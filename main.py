@@ -24,14 +24,15 @@ class Sprite:
     
     def draw(self):
         window.blit(self.img , (self.rect.x, self.rect.y))
-
+        
 class Player(Sprite):
     def __init__(self , x , y , w , h , img , speed):
         super().__init__(x, y, w, h, img)
         self.speed = speed
     
-    def move(self):
+    def move(self , walls):
         keys = pygame.key.get_pressed()
+        orig_pos = self.rect.copy()
         if keys[pygame.K_w]:
             if self.rect.y > 0:
                 self.rect.y -= self.speed
@@ -44,6 +45,10 @@ class Player(Sprite):
         if keys[pygame.K_d]:
             if self.rect.right < wind_w:
                 self.rect.x += self.speed
+        
+        for wall in walls:    
+            if self.rect.colliderect(wall.rect):
+                self.rect = orig_pos
 
 class Enemy(Sprite):
     def __init__(self , x , y , w , h , img , speed):
@@ -71,7 +76,7 @@ for row in lvl1:
     block_x = 0
     block_y += block_size
 
-player = Player(0, 400, 50, 50, pygame.image.load("images/steve.png"), 3)
+player = Player(35, 50, 20, 20, pygame.image.load("images/steve.png"), 3)
 
 otladka()
 
@@ -87,7 +92,7 @@ while game:
             game = False
     
     player.draw()
-    player.move()
+    player.move(blocks)
     
     pygame.display.update()
     clock.tick(FPS)
