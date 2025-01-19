@@ -1,6 +1,7 @@
 import pygame
 pygame.init()
 from map1 import *
+from time import sleep
 
 FPS = 60
 clock = pygame.time.Clock()
@@ -49,7 +50,7 @@ class Player(Sprite):
         for wall in walls:    
             if self.rect.colliderect(wall.rect):
                 self.rect = orig_pos
-
+        
 class Enemy(Sprite):
     def __init__(self , x , y , w , h , img , speed):
         super().__init__(x, y, w, h, img)
@@ -64,6 +65,7 @@ block_size = 25
 block_x = 0
 block_y = 0
 block_img = pygame.image.load("images/wall.png")
+skarb_img = pygame.image.load("images/netherite.png")
 
 def otladka():
     print(len(blocks))
@@ -77,6 +79,7 @@ for row in lvl1:
     block_y += block_size
 
 player = Player(35, 50, 20, 20, pygame.image.load("images/steve.png"), 3)
+skarb = Sprite(525, 350, 40, 40, skarb_img)
 
 otladka()
 
@@ -91,9 +94,17 @@ while game:
         if event.type == pygame.QUIT:
             game = False
     
-    player.draw()
-    player.move(blocks)
+    if player.rect.colliderect(skarb.rect):
+        pygame.mixer.music.load("win.mp3")
+        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.play(-1)
+        sleep(2)
+        game = False
     
+    player.draw()
+    skarb.draw()
+    player.move(blocks)
+
     pygame.display.update()
     clock.tick(FPS)
     
