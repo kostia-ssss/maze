@@ -51,6 +51,7 @@ class Player(Sprite):
             if self.rect.colliderect(wall.rect):
                 self.rect = orig_pos
 
+
 class Enemy(Sprite):
     def __init__(self , x , y , w , h , img , speed, dir):
         super().__init__(x, y, w, h, img)
@@ -63,11 +64,13 @@ class Enemy(Sprite):
             self.dir *= -1
 
 blocks = []
+Dblocks = []
 block_size = 25
 
 block_x = 0
 block_y = 0
 block_img = pygame.image.load("images/wall.png")
+Dblock_img = pygame.image.load("images/danger_wall.png")
 
 def otladka():
     print(len(blocks))
@@ -80,6 +83,8 @@ for row in lvl1:
             skarb = Sprite(block_x, block_y, 30, 30, pygame.image.load("images/netherite.png"))
         elif tile == "3":
             enemy = Enemy(block_x, block_y, 30, 30, pygame.image.load("images/zombie.png"), 3, 1)
+        elif tile == "4":
+            Dblocks.append(Sprite(block_x, block_y, block_size, block_size, Dblock_img))
         block_x += block_size
     block_x = 0
     block_y += block_size
@@ -89,6 +94,7 @@ player = Player(35, 50, 20, 20, pygame.image.load("images/steve.png"), 3)
 otladka()
 
 font = pygame.font.SysFont("Comfortaa" , 50)
+font2 = pygame.font.SysFont("Comfortaa" , 20)
 win = font.render("You win!", True, (0, 100, 0))
 lose = font.render("You lose(", True, (100, 0, 0))
 reset = font.render("Press R to reset", True, (0, 0, 0))
@@ -100,6 +106,9 @@ while game:
         window.blit(background, (0, 0))
         
         for b in blocks:
+            b.draw()
+        
+        for b in Dblocks:
             b.draw()
         
         player.draw()
@@ -117,6 +126,9 @@ while game:
             window.blit(lose, (200, 200))
             window.blit(reset, (200, 250))
             finish = True
+           
+        if any(player.rect.colliderect(block.rect) for block in Dblocks):
+            player = Player(35, 50, 20, 20, pygame.image.load("images/steve.png"), 3)
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
