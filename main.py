@@ -17,6 +17,9 @@ pygame.mixer.music.load("sound.mp3")
 pygame.mixer.music.set_volume(0.3)
 pygame.mixer.music.play(-1)
 
+gg = pygame.mixer.Sound("gameover.wav")
+nice = pygame.mixer.Sound("nice.mp3")
+
 class Sprite:
     def __init__(self , x , y , w , h, img):
         self.img = img
@@ -142,11 +145,13 @@ while game:
         player.move(blocks)
 
         if player.rect.colliderect(skarb.rect):
+            nice.play()
             window.blit(win, (200, 200))
             window.blit(reset, (200, 250))
             finish = True
         
         if any(player.rect.colliderect(e.rect) for e in enemies):
+            gg.play()
             window.blit(lose, (200, 200))
             window.blit(reset, (200, 250))
             finish = True
