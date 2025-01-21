@@ -15,7 +15,7 @@ background = pygame.transform.scale(background, (wind_w , wind_h))
 
 pygame.mixer.music.load("sound.mp3")
 pygame.mixer.music.set_volume(0.3)
-pygame.mixer.music.play(-1)
+#pygame.mixer.music.play(-1)
 
 class Sprite:
     def __init__(self , x , y , w , h, img):
@@ -50,14 +50,17 @@ class Player(Sprite):
         for wall in walls:    
             if self.rect.colliderect(wall.rect):
                 self.rect = orig_pos
-        
+
 class Enemy(Sprite):
-    def __init__(self , x , y , w , h , img , speed):
+    def __init__(self , x , y , w , h , img , speed, dir):
         super().__init__(x, y, w, h, img)
         self.speed = speed
+        self.dir = dir
     
-    def move(self):
-        pass
+    def move(self, maze):
+        self.rect.x -= self.speed * self.dir
+        if any(self.rect.colliderect(obstacle.rect) for obstacle in maze) or self.rect.left <= 0 or self.rect.right >= window.get_width():
+            self.dir *= -1
 
 blocks = []
 block_size = 25
@@ -65,7 +68,6 @@ block_size = 25
 block_x = 0
 block_y = 0
 block_img = pygame.image.load("images/wall.png")
-skarb_img = pygame.image.load("images/netherite.png")
 
 def otladka():
     print(len(blocks))
@@ -74,37 +76,55 @@ for row in lvl1:
     for tile in row:
         if tile == "1":
             blocks.append(Sprite(block_x, block_y, block_size, block_size, block_img))
+        elif tile == "2":
+            skarb = Sprite(block_x, block_y, 30, 30, pygame.image.load("images/netherite.png"))
+        elif tile == "3":
+            enemy = Enemy(block_x, block_y, 30, 30, pygame.image.load("images/zombie.png"), 3, 1)
         block_x += block_size
     block_x = 0
     block_y += block_size
 
 player = Player(35, 50, 20, 20, pygame.image.load("images/steve.png"), 3)
-skarb = Sprite(525, 350, 40, 40, skarb_img)
 
 otladka()
 
+font = pygame.font.SysFont("Comfortaa" , 50)
+win = font.render("You win!", True, (0, 100, 0))
+lose = font.render("You lose(", True, (100, 0, 0))
+reset = font.render("Press R to reset", True, (0, 0, 0))
+
 game = True
+finish = False
 while game:
-    window.blit(background, (0, 0))
-    
-    for b in blocks:
-        b.draw()
+    if not finish:
+        window.blit(background, (0, 0))
+        
+        for b in blocks:
+            b.draw()
+        
+        player.draw()
+        skarb.draw()
+        enemy.draw()
+        player.move(blocks)
+        enemy.move(blocks)
+
+        if player.rect.colliderect(skarb.rect):
+            window.blit(win, (200, 200))
+            window.blit(reset, (200, 250))
+            finish = True
+        
+        if player.rect.colliderect(enemy.rect):
+            window.blit(lose, (200, 200))
+            window.blit(reset, (200, 250))
+            finish = True
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            game = False
+            finish = True
+            
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+            finish = False
+            player = Player(35, 50, 20, 20, pygame.image.load("images/steve.png"), 3)
     
-    if player.rect.colliderect(skarb.rect):
-        pygame.mixer.music.load("win.mp3")
-        pygame.mixer.music.set_volume(0.5)
-        pygame.mixer.music.play(-1)
-        sleep(2)
-        game = False
-    
-    player.draw()
-    skarb.draw()
-    player.move(blocks)
-
     pygame.display.update()
     clock.tick(FPS)
-    
