@@ -30,8 +30,11 @@ class Sprite:
         window.blit(self.img , (self.rect.x, self.rect.y))
         
 class Player(Sprite):
-    def __init__(self , x , y , w , h , img , speed):
-        super().__init__(x, y, w, h, img)
+    def __init__(self , x , y , w , h , img1, img2 , speed):
+        super().__init__(x, y, w, h, img1)
+        self.img_r = self.img
+        self.img_l = pygame.transform.scale(img2, (w, h))
+        self.speed = speed
         self.speed = speed
     
     def move(self , walls):
@@ -44,9 +47,11 @@ class Player(Sprite):
             if self.rect.bottom < wind_h:
                 self.rect.y += self.speed
         if keys[pygame.K_a]:
+            self.img = self.img_l
             if self.rect.x > 0:
                 self.rect.x -= self.speed
         if keys[pygame.K_d]:
+            self.img = self.img_r
             if self.rect.right < wind_w:
                 self.rect.x += self.speed
         
@@ -106,7 +111,9 @@ for row in lvl1:
     block_x = 0
     block_y += block_size
 
-player = Player(35, 50, 20, 20, pygame.image.load("images/steve.png"), 3)
+p_img1 = pygame.image.load("images/steve.png")
+p_img2 = pygame.transform.flip(p_img1, True, False)
+player = Player(35, 50, 20, 20, p_img1, p_img2, 3)
 
 font = pygame.font.SysFont("Comfortaa" , 50)
 font2 = pygame.font.SysFont("Comfortaa" , 20)
@@ -157,7 +164,7 @@ while game:
             finish = True
            
         if any(player.rect.colliderect(block.rect) for block in Dblocks):
-            player = Player(35, 50, 20, 20, pygame.image.load("images/steve.png"), 3)
+            player = Player(35, 50, 20, 20, p_img1, p_img2, 3)
         
         coins_t = font3.render(str(coins), True, (0, 0, 0)) 
         window.blit(coins_t, (10, 10))
@@ -169,7 +176,7 @@ while game:
         if event.type == pygame.KEYDOWN and event.key == pygame.K_r and finish == True:
             finish = False
             coins = 0
-            player = Player(35, 50, 20, 20, pygame.image.load("images/steve.png"), 3)
+            player = Player(35, 50, 20, 20, p_img1, p_img2, 3)
     
     pygame.display.update()
     clock.tick(FPS)
